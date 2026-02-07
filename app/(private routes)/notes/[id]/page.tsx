@@ -1,11 +1,11 @@
-import { fetchNoteById } from "@/lib/api/api";
+import { fetchNoteById } from "@/lib/api/serverApi";
 import {
   QueryClient,
   HydrationBoundary,
   dehydrate,
 } from "@tanstack/react-query";
 import NoteDetailsClient from "./NoteDetails.client";
-import { Metadata } from "next";
+import type { Metadata } from "next";
 
 interface NoteDetailsPageProps {
   params: Promise<{ id: string }>;
@@ -15,18 +15,18 @@ export async function generateMetadata({
   params,
 }: NoteDetailsPageProps): Promise<Metadata> {
   const { id } = await params;
+
   const note = await fetchNoteById(id);
   const title = `Note: ${note.title}`;
   const description = note.content.slice(0, 80);
 
-  const url = `https://08-zustand-gamma-blue.vercel.app/notes/${id}`;
   return {
     title,
     description,
     openGraph: {
       title,
       description,
-      url,
+      // краще потім підставити свій актуальний домен Vercel
       images: [
         {
           url: "https://ac.goit.global/fullstack/react/notehub-og-meta.jpg",
@@ -44,6 +44,7 @@ export default async function NoteDetailsPage({
   params,
 }: NoteDetailsPageProps) {
   const { id } = await params;
+
   const queryClient = new QueryClient();
 
   await queryClient.prefetchQuery({

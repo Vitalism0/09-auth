@@ -21,7 +21,8 @@ export default function AuthNavigation() {
       await logout();
     } finally {
       clearIsAuthenticated();
-      router.push("/sign-in");
+      router.replace("/sign-in");
+      router.refresh();
     }
   };
 
@@ -40,7 +41,7 @@ export default function AuthNavigation() {
           </li>
 
           <li className={css.navigationItem}>
-            <p className={css.userEmail}>{user?.email ?? "User email"}</p>
+            <p className={css.userEmail}>{user?.email}</p>
             <button
               type="button"
               className={css.logoutButton}

@@ -26,6 +26,11 @@ export default function AuthProvider({
     [pathname],
   );
 
+  const isAuthRoute = useMemo(
+    () => pathname.startsWith("/sign-in") || pathname.startsWith("/sign-up"),
+    [pathname],
+  );
+
   useEffect(() => {
     let alive = true;
 
@@ -38,10 +43,17 @@ export default function AuthProvider({
 
         if (user) {
           setUser(user);
+
+          if (isAuthRoute) {
+            router.replace("/profile");
+            router.refresh();
+          }
+
           setLoading(false);
           return;
         }
 
+        // user == null → неавторизований
         clearIsAuthenticated();
 
         if (isPrivateRoute) {
@@ -49,6 +61,7 @@ export default function AuthProvider({
             await logout();
           } catch {}
           router.replace("/sign-in");
+          router.refresh();
         }
 
         setLoading(false);
@@ -62,6 +75,7 @@ export default function AuthProvider({
             await logout();
           } catch {}
           router.replace("/sign-in");
+          router.refresh();
         }
 
         setLoading(false);
@@ -71,7 +85,14 @@ export default function AuthProvider({
     return () => {
       alive = false;
     };
-  }, [isPrivateRoute, pathname, router, setUser, clearIsAuthenticated]);
+  }, [
+    isPrivateRoute,
+    isAuthRoute,
+    pathname,
+    router,
+    setUser,
+    clearIsAuthenticated,
+  ]);
 
   if (loading) return <div style={{ padding: 24 }}>Loading...</div>;
   if (isPrivateRoute && !isAuthenticated) return null;

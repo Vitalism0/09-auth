@@ -16,17 +16,20 @@ export default function SignInPage() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (isPending) return;
+
     setError("");
 
     const formData = new FormData(e.currentTarget);
-    const email = String(formData.get("email"));
-    const password = String(formData.get("password"));
+    const email = String(formData.get("email") ?? "");
+    const password = String(formData.get("password") ?? "");
 
     try {
       setIsPending(true);
 
       const user = await login({ email, password });
       setUser(user);
+
       router.push("/profile");
     } catch {
       setError("Login failed");
@@ -72,7 +75,7 @@ export default function SignInPage() {
           </button>
         </div>
 
-        <p className={css.error}>{error}</p>
+        {error ? <p className={css.error}>{error}</p> : null}
       </form>
     </main>
   );

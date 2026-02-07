@@ -1,5 +1,6 @@
-import { type Note, type CreateNote } from "@/types/note";
+// lib/api/clientApi.ts
 import { api } from "./api";
+import type { Note, CreateNote } from "@/types/note";
 import type { User } from "@/types/user";
 
 export type FetchNotesParams = {
@@ -9,57 +10,67 @@ export type FetchNotesParams = {
   tag?: string;
 };
 
-export type FetchNotesResult = { notes: Note[]; totalPages: number } | Note[];
+type NotesApiResponse = { notes: Note[]; totalPages: number } | Note[];
 
-export async function fetchNotes(params: FetchNotesParams) {
-  const { data } = await api.get<FetchNotesResult>("/notes", { params });
-
+function normalizeNotesResponse(data: NotesApiResponse) {
   if (Array.isArray(data)) {
     return { notes: data, totalPages: 1 };
   }
-
   return data;
 }
 
-export const createNote = async (payload: CreateNote): Promise<Note> => {
-  const res = await api.post<Note>("/notes", payload);
-  return res.data;
-};
-export const deleteNote = async (noteId: Note["id"]): Promise<Note> => {
-  const res = await api.delete<Note>(`/notes/${noteId}`);
-  return res.data;
-};
+// Notes
+export async function fetchNotes(params: FetchNotesParams) {
+  const { data } = await api.get<NotesApiResponse>("/notes", { params });
+  return normalizeNotesResponse(data);
+}
+
 export async function fetchNoteById(id: Note["id"]) {
   const { data } = await api.get<Note>(`/notes/${id}`);
   return data;
 }
+
+export async function createNote(payload: CreateNote): Promise<Note> {
+  const { data } = await api.post<Note>("/notes", payload);
+  return data;
+}
+
+export async function deleteNote(noteId: Note["id"]): Promise<Note> {
+  const { data } = await api.delete<Note>(`/notes/${noteId}`);
+  return data;
+}
+
 // Auth
-export async function register(payload: { email: string; password: string }) {
+export type AuthPayload = { email: string; password: string };
+
+export async function register(payload: AuthPayload): Promise<User> {
   const { data } = await api.post<User>("/auth/register", payload);
   return data;
 }
 
-export async function login(payload: { email: string; password: string }) {
+export async function login(payload: AuthPayload): Promise<User> {
   const { data } = await api.post<User>("/auth/login", payload);
   return data;
 }
 
-export async function logout() {
+export async function logout(): Promise<void> {
   await api.post("/auth/logout");
 }
 
-export async function checkSession() {
-  const { data } = await api.get<User | null>("/auth/session");
-  return data;
+export async function checkSession(): Promise<User | null> {
+  const { data } = await api.get<User | "" | null | undefined>("/auth/session");
+
+  if (!data || typeof data !== "object") return null;
+  return data as User;
 }
 
 // Users
-export async function getMe() {
+export async function getMe(): Promise<User> {
   const { data } = await api.get<User>("/users/me");
   return data;
 }
 
-export async function updateMe(payload: { username: string }) {
+export async function updateMe(payload: { username: string }): Promise<User> {
   const { data } = await api.patch<User>("/users/me", payload);
   return data;
 }

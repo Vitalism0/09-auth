@@ -1,14 +1,14 @@
-import { CreateNotePayload } from "@/types/note";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import type { CreateNote } from "@/types/note";
 
 type NoteDraftStore = {
-  draft: CreateNotePayload;
-  setDraft: (note: CreateNotePayload) => void;
+  draft: CreateNote;
+  setDraft: (note: CreateNote) => void;
   clearDraft: () => void;
 };
 
-const initialDraft: CreateNotePayload = {
+const initialDraft: CreateNote = {
   title: "",
   content: "",
   tag: "Todo",
@@ -18,11 +18,9 @@ export const useNoteStore = create<NoteDraftStore>()(
   persist(
     (set) => ({
       draft: initialDraft,
-      setDraft: (note) => set(() => ({ draft: note })),
-      clearDraft: () => set(() => ({ draft: initialDraft })),
+      setDraft: (note) => set({ draft: note }),
+      clearDraft: () => set({ draft: initialDraft }),
     }),
-    {
-      name: "note-draft",
-    },
+    { name: "note-draft" },
   ),
 );

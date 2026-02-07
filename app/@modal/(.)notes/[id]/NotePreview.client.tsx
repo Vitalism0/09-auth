@@ -3,7 +3,7 @@
 import Modal from "@/components/Modal/Modal";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import { fetchNoteById } from "@/lib/api/api";
+import { fetchNoteById } from "@/lib/api/clientApi";
 import NoteDetails from "@/components/NoteDetails/NoteDetails";
 import type { Note } from "@/types/note";
 
@@ -14,6 +14,7 @@ export default function NoteModalClient({ id }: { id: string }) {
     queryKey: ["note", id],
     queryFn: () => fetchNoteById(id),
     enabled: !!id,
+    refetchOnMount: false,
   });
 
   return (

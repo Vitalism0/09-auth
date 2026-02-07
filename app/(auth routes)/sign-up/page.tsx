@@ -5,30 +5,33 @@ import { useRouter } from "next/navigation";
 
 import css from "@/components/SignUpPage/SignUpPage.module.css";
 import { register } from "@/lib/api/clientApi";
+import { useAuthStore } from "@/lib/store/authStore";
 
 export default function SignUpPage() {
   const router = useRouter();
+  const setUser = useAuthStore((s) => s.setUser);
 
   const [error, setError] = useState("");
   const [isPending, setIsPending] = useState(false);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (isPending) return;
+
     setError("");
 
-    const form = event.currentTarget;
-    const formData = new FormData(form);
-
-    const email = String(formData.get("email"));
-    const password = String(formData.get("password"));
+    const formData = new FormData(event.currentTarget);
+    const email = String(formData.get("email") ?? "");
+    const password = String(formData.get("password") ?? "");
 
     try {
       setIsPending(true);
 
-      await register({ email, password });
+      const user = await register({ email, password });
+      setUser(user);
 
       router.push("/profile");
-    } catch (error) {
+    } catch {
       setError("Registration failed");
     } finally {
       setIsPending(false);
